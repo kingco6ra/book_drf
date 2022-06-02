@@ -15,10 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 class BookSerializer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField()
+    rating = serializers.DecimalField(max_digits=3, decimal_places=2, read_only=True)
 
     class Meta:
         model = Book
-        fields = ('id', 'title', 'price', 'author', 'likes')
+        fields = ('id', 'title', 'price', 'author', 'likes', 'rating')
 
     def get_likes(self, instance):
         return UserBookRelation.objects.filter(book=instance, like=True).count()
