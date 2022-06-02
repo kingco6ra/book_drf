@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.db.models import Count, Case, When
+from django.db.models import Count, Case, When, Avg
 from django.test import TestCase
 
 from store.models import Book, UserBookRelation
@@ -15,15 +15,18 @@ class BookSerializerTestCase(TestCase):
         book_1 = Book.objects.create(title='Test_1', author='Author 1', price=15)
         book_2 = Book.objects.create(title='Test_2', author='Author 2', price=25)
 
-        UserBookRelation.objects.create(user=user1, book=book_1, like=True)
-        UserBookRelation.objects.create(user=user2, book=book_1, like=True)
-        UserBookRelation.objects.create(user=user3, book=book_1, like=True)
+        UserBookRelation.objects.create(user=user1, book=book_1, like=True, rating=4)
+        UserBookRelation.objects.create(user=user2, book=book_1, like=True, rating=2)
+        UserBookRelation.objects.create(user=user3, book=book_1, like=True, rating=5)
 
-        UserBookRelation.objects.create(user=user1, book=book_2, like=True)
-        UserBookRelation.objects.create(user=user2, book=book_2, like=True)
+        UserBookRelation.objects.create(user=user1, book=book_2, like=True, rating=5)
+        UserBookRelation.objects.create(user=user2, book=book_2, like=True, rating=3)
         UserBookRelation.objects.create(user=user3, book=book_2, like=False)
 
-        data = BookSerializer([book_1, book_2], many=True).data
+        books = Book.objects.all().annotate(
+            rating=Avg('userbookrelation__rating')
+        ).order_by('id')
+        data = BookSerializer(books, many=True).data
         expected_data = [
             {
                 'id': book_1.id,
@@ -31,6 +34,7 @@ class BookSerializerTestCase(TestCase):
                 'price': '15.00',
                 'author': 'Author 1',
                 'likes': 3,
+                'rating': '3.67',
             },
             {
                 'id': book_2.id,
@@ -38,6 +42,7 @@ class BookSerializerTestCase(TestCase):
                 'price': '25.00',
                 'author': 'Author 2',
                 'likes': 2,
+                'rating': '4.00',
             }
         ]
 
