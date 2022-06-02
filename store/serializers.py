@@ -14,11 +14,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BookSerializer(serializers.ModelSerializer):
-    owner = serializers.HyperlinkedRelatedField(view_name='user-detail', read_only=True)
+    likes = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
-        fields = '__all__'
+        fields = ('id', 'title', 'price', 'author', 'likes')
+
+    def get_likes(self, instance):
+        return UserBookRelation.objects.filter(book=instance, like=True).count()
 
 
 class UserBookRelationSerializer(serializers.ModelSerializer):
