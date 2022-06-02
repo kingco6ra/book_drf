@@ -27,7 +27,7 @@ class BookViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.validated_data['owner'] = self.request.user
-        serializer.save()
+        return serializer.save()
 
 
 class UserBookRelationView(UpdateModelMixin, GenericViewSet):
