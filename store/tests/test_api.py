@@ -152,7 +152,6 @@ class BooksRelationAPITestCase(APITestCase):
 
         self.assertEqual(status.HTTP_200_OK, response.status_code)
         relation = UserBookRelation.objects.get(user=self.user, book=self.book_1)
-        print(relation)
         self.assertTrue(relation.like)
 
     def test_bookmarks(self):
