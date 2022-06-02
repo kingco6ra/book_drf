@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.mixins import UpdateModelMixin
@@ -17,7 +18,10 @@ class UserViewSet(ModelViewSet):
 
 
 class BookViewSet(ModelViewSet):
-    queryset = Book.objects.all()
+    queryset = Book.objects.all().annotate(
+            rating=Avg('userbookrelation__rating')
+        ).order_by('id')
+
     serializer_class = BookSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     permission_classes = [IsOwnerOrReadOnly]
@@ -42,4 +46,4 @@ class UserBookRelationView(UpdateModelMixin, GenericViewSet):
 
     def perform_create(self, serializer):
         serializer.validated_data['user'] = self.request.user
-        serializer.save()
+        return serializer.save()
