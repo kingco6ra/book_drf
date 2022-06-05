@@ -10,7 +10,7 @@ class Book(models.Model):
     evaluations = models.ManyToManyField(User, through='UserBookRelation', related_name='evaluations')
 
     def __str__(self):
-        return f'{self.title} - {self.price}'
+        return f'{self.id}. {self.author} / {self.title} - ${self.price}'
 
 
 class UserBookRelation(models.Model):
